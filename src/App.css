@@ -2,15 +2,20 @@
   text-align: center;
 }
 
+.list-container {
+  height: 600px;
+  overflow: auto;
+}
+
 .image-container {
   display: flex;
-  width: 300px;
 
-  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .image-container img {
-  width: 100%;
+  height: 180px;
+  width: auto;
   margin-right: 20px;
 }
 
