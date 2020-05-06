@@ -6,17 +6,8 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      startIndex: 0,
-      visibleImages: [
-        { id: 0, download_url: "https://i.picsum.photos/id/10/2500/1667.jpg" },
-        { id: 1, download_url: "https://i.picsum.photos/id/0/5616/3744.jpg" },
-        { id: 2, download_url: "https://i.picsum.photos/id/100/2500/1656.jpg" },
-        {
-          id: 3,
-          download_url: "https://i.picsum.photos/id/1001/5616/3744.jpg"
-        },
-        { id: 4, download_url: "https://i.picsum.photos/id/1/5616/3744.jpg" }
-      ],
+      lastIndex: 0,
+      numberOfRows: 0,
       isCart: false
     };
   }
@@ -54,55 +45,54 @@ class App extends Component {
   ];
 
   componentDidMount() {
-    document
-      .querySelector(".list-container")
-      .addEventListener("scroll", this.handleScroll);
+    const listContainer = document.querySelector(".list-container");
+    listContainer.addEventListener("scroll", this.handleScroll);
+    const portSize = window.innerHeight - listContainer.offsetTop;
+
+    let imageContainer = document.querySelector(".image-container");
+    let rowSize = imageContainer.offsetHeight;
+    rowSize += parseInt(
+      window.getComputedStyle(imageContainer).getPropertyValue("margin-top")
+    );
+    rowSize += parseInt(
+      window.getComputedStyle(imageContainer).getPropertyValue("margin-bottom")
+    );
+
+    const numberOfRows = Math.floor(portSize / rowSize);
+
+    for (let i = 0; i < numberOfRows + 2; i++) {
+      this.images[i].isVisible = true;
+    }
+
+    this.setState({
+      numberOfRows: numberOfRows,
+      rowSize: rowSize
+    });
   }
 
   handleScroll = event => {
     const scrollTop = event.target.scrollTop;
-    const rowSize = 200;
-    const portSize = 600;
-    const numberOfRows = portSize / rowSize;
 
-    //if scrolling upwards then add a image from top and remove from down
-    if (scrollTop === 0 && this.state.startIndex !== 0) {
-      const visibleRows = [];
+    const currentIndex = Math.floor(scrollTop / this.state.rowSize);
 
-      for (
-        let i = this.state.startIndex - 1;
-        i <= this.state.startIndex + numberOfRows - 1;
-        i++
-      ) {
-        visibleRows.push(this.images[i]);
-      }
-      event.target.scrollTo(0, scrollTop + rowSize);
-      this.setState({
-        visibleImages: [...visibleRows],
-        startIndex: this.state.startIndex - 1
-      });
-    }
-
-    //if scrolling downwards then add a image from bottom and remove from top
-    if (
-      Math.floor(scrollTop / rowSize) > 0 &&
-      this.state.startIndex + numberOfRows + 1 < this.images.length
+    for (
+      let i = currentIndex;
+      i <= currentIndex + this.state.numberOfRows;
+      i++
     ) {
-      const visibleRows = [];
-
-      for (
-        let i = this.state.startIndex + 1;
-        i <= this.state.startIndex + numberOfRows + 1;
-        i++
-      ) {
-        visibleRows.push(this.images[i]);
-      }
-      event.target.scrollTo(0, scrollTop - rowSize);
-      this.setState({
-        visibleImages: [...visibleRows],
-        startIndex: this.state.startIndex + 1
-      });
+      i < this.images.length && (this.images[i].isVisible = true);
     }
+
+    currentIndex && (this.images[currentIndex - 1].isVisible = false);
+
+    currentIndex + this.state.numberOfRows + 1 < this.images.length &&
+      (this.images[
+        currentIndex + this.state.numberOfRows + 1
+      ].isVisible = false);
+
+    this.setState({
+      lastIndex: currentIndex
+    });
   };
 
   onselected = image => {
@@ -128,10 +118,7 @@ class App extends Component {
           {this.state.isCart ? (
             <CartComponent images={this.images} />
           ) : (
-            <ListComponent
-              images={this.state.visibleImages}
-              onselected={this.onselected}
-            />
+            <ListComponent images={this.images} onselected={this.onselected} />
           )}
         </div>
       </div>

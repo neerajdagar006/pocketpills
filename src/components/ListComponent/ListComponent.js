@@ -5,7 +5,9 @@ export default function ListComponent({ images, onselected }) {
     <div>
       {images.map(image => (
         <div className="image-container" id={image.id} key={image.id}>
-          <img src={image.download_url} alt="image" />
+          {image.isVisible ? (
+            <img src={image.download_url} alt="image" />
+          ) : null}
           <input
             type="checkbox"
             onChange={() => onselected(image)}

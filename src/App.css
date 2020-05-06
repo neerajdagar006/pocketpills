@@ -9,12 +9,13 @@
 
 .image-container {
   display: flex;
+  height: 180px;
 
   margin-bottom: 20px;
 }
 
 .image-container img {
-  height: 180px;
+  height: 100%;
   width: auto;
   margin-right: 20px;
 }
